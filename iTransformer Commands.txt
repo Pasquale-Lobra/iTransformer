@@ -1,0 +1,89 @@
+#Accesso a Blackhole:
+ssh pasqualecutolo@blackhole.uniparthenope.it
+Lobra2023!
+
+
+#-----------------------------------------------------------------PREPARAZIONE AMBIENTE------------------------------------------------------------
+#---------------------------------------------Su BlackHole
+#Creazione directories e clone git
+cd Tesi
+mkdir MultivariateTimeSeriesTransformer
+cd MultivariateTimeSeriesTransformer
+mkdir experiments
+git clone https://github.com/gzerveas/mvts_transformer.git
+
+#Creazione e attivazione ENV
+conda create --name transf python=3.8
+conda activate transf
+cd mvts_transformer
+//pip3 install -r requirements.
+//pip install -r requirements.txt
+pip install -r failsafe_requirements.txt
+pip install numpy==1.21.6
+
+#Installazione driver cuda
+conda install -c conda-forge cudatoolkit=11.1.1 cudnn=8.1.0
+conda install pytorch==1.7.0 torchvision==0.8.0 torchaudio==0.7.0 cudatoolkit=11.0 -c pytorch #Installiamo una versione precedente perché i driver CUDA sono vecchi
+
+#Abilitazione debug remoto
+//pip3 install --upgrade debugpy
+pip install --upgrade debugpy
+
+#Abilitazione GPU 1 (Più forte)
+export CUDA_VISIBLE_DEVICES=0
+
+#Installazione TensorFlow per usare TensorBoard
+pip install nvidia-pyindex ???
+//pip install nvidia-tensorrt
+pip install nvidia-tensorrt==7.2.3.4 ???
+pip install tensorflow-io
+pip install tensorflow[and-cuda]==2.11.0
+
+
+#-----------------------------------------------------------------ESECUZIONE-------------------------------------------------------------------------
+#Creazione screen
+screen -S BeijingPM25Quality
+
+#Attivazione ENV e impostazione Cuda Device
+conda activate transf
+export CUDA_VISIBLE_DEVICES=0
+cd Tesi/MultivariateTimeSeriesTransformer/mvts_transformer/
+
+#Esecuzione test
+BeijingPM25Quality
+python src/main.py --output_dir experiments --comment "regression from Scratch" --name BeijingPM25Quality_fromScratch_Regression --records_file Regression_records.xls --data_dir src/datasets/Regression/BeijingPM25Quality/ --data_class tsra --pattern TRAIN --val_pattern TEST --epochs 1000 --lr 0.001 --optimizer RAdam  --pos_encoding learnable --task regression
+python src/main_debug.py --output_dir experiments --comment "regression from Scratch" --name BeijingPM25Quality_fromScratch_Regression --records_file Regression_records.xls --data_dir src/datasets/Regression/BeijingPM25Quality/ --data_class tsra --pattern TRAIN --val_pattern TEST --epochs 1000 --lr 0.001 --optimizer RAdam  --pos_encoding learnable --task regression
+
+#Chiusura screen senza perdere l’elaborazione (Detach)
+CTRL+A , D
+
+#Riattivazione screen (Attach):
+screen -r BeijingPM25Quality
+
+#-----------------------------------------------------------------DEBUG REMOTO-------------------------------------------------------------------------
+#Creazione tunnel
+ssh -L 5678:localhost:5678 pasqualecutolo@blackhole.uniparthenope.it
+
+#Attivazione ENV e impostazione Cuda Device
+conda activate transf
+export CUDA_VISIBLE_DEVICES=0
+cd Tesi/MultivariateTimeSeriesTransformer/mvts_transformer/
+
+#Esecuzione test
+BeijingPM25Quality
+python src/main_debug.py --output_dir experiments --comment "regression from Scratch" --name BeijingPM25Quality_fromScratch_Regression --records_file Regression_records.xls --data_dir src/datasets/Regression/BeijingPM25Quality/ --data_class tsra --pattern TRAIN --val_pattern TEST --epochs 1000 --lr 0.001 --optimizer RAdam  --pos_encoding learnable --task regression
+ --limit_size 2 --n_proc 24 --num_workers 10
+
+
+#-----------------------------------------------------------------TensorBoard REMOTO-------------------------------------------------------------------------
+ssh -L 5679:localhost:5679 pasqualecutolo@blackhole.uniparthenope.it
+conda activate transf
+export CUDA_VISIBLE_DEVICES=0
+cd /home/pasqualecutolo/Tesi/MultivariateTimeSeriesTransformer/mvts_transformer/experiments
+cd Tesi/MultivariateTimeSeriesTransformer/mvts_transformer/experiments/BeijingPM25Quality_fromScratch_Regression_2024-03-17_08-54-32_lw2
+//export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/pasqualecutolo/.conda/envs/transf/lib
+//export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/pasqualecutolo/.conda/envs/transf/lib/python3.8/site-packages/tensorrt
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/pasqualecutolo/.conda/envs/transf/lib:/home/pasqualecutolo/.conda/envs/transf/lib/python3.8/site-packages/tensorrt
+tensorboard --logdir tb_summaries --port 5679
+
+http://127.0.0.1:5679/
