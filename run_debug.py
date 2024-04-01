@@ -4,8 +4,15 @@ from experiments.exp_long_term_forecasting import Exp_Long_Term_Forecast
 from experiments.exp_long_term_forecasting_partial import Exp_Long_Term_Forecast_Partial
 import random
 import numpy as np
+import debugpy
 
 if __name__ == '__main__':
+    # Allow other computers to attach to debugpy at this IP address and port.
+    debugpy.listen(('localhost', 5678))
+
+    # Pause the program until a remote debugger is attached
+    debugpy.wait_for_client()
+
     fix_seed = 2023
     random.seed(fix_seed)
     torch.manual_seed(fix_seed)
