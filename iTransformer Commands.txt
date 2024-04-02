@@ -70,8 +70,9 @@ conda activate iTransf
 export CUDA_VISIBLE_DEVICES=0
 cd Tesi/iTransformer/
 
-#Esecuzione debug
-electricity
+#---------------------------------Esecuzione debug
+
+#TRAINING
   --model $model_name \
 python -u run_debug.py \
   --is_training 1 \
@@ -92,4 +93,27 @@ python -u run_debug.py \
   --d_ff 512 \
   --batch_size 16 \
   --learning_rate 0.001 \
+  --itr 1
+
+#TEST without training and loading already trained model
+ python -u run_debug.py \
+  --is_training 0 \
+  --root_path ./dataset/traffic/ \
+  --data_path traffic.csv \
+  --model_id traffic_96_96 \
+  --model iTransformer \
+  --data custom \
+  --features M \
+  --seq_len 96 \
+  --pred_len 96 \
+  --e_layers 4 \
+  --enc_in 862 \
+  --dec_in 862 \
+  --c_out 862 \
+  --des 'Exp' \
+  --d_model 512\
+  --d_ff 512 \
+  --batch_size 16 \
+  --learning_rate 0.001 \
+  --do_predict \
   --itr 1
