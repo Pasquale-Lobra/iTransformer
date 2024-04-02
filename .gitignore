@@ -130,19 +130,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 iTransformer_datasets.zip
-dataset/weather/weather.csv
-dataset/traffic/.DS_Store
-dataset/Solar/solar_AL.txt
-dataset/PEMS/PEMS08.npz
-dataset/PEMS/PEMS07.npz
-dataset/PEMS/PEMS04.npz
-dataset/PEMS/PEMS03.npz
-dataset/exchange_rate/exchange_rate.csv
-dataset/exchange_rate/.DS_Store
-dataset/ETT-small/ETTm2.csv
-dataset/ETT-small/ETTm1.csv
-dataset/ETT-small/ETTh2.csv
-dataset/ETT-small/ETTh1.csv
-dataset/electricity/electricity.csv
-dataset/electricity/.DS_Store
-dataset/traffic/traffic.csv
+dataset/
+results/
+test_results/

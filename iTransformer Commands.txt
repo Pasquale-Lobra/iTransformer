@@ -7,19 +7,13 @@ Lobra2023!
 #---------------------------------------------Su BlackHole
 #Creazione directories e clone git
 cd Tesi
-mkdir MultivariateTimeSeriesTransformer
-cd MultivariateTimeSeriesTransformer
-mkdir experiments
-git clone https://github.com/gzerveas/mvts_transformer.git
+git clone https://github.com/Pasquale-Lobra/iTransformer.git
 
 #Creazione e attivazione ENV
-conda create --name transf python=3.8
-conda activate transf
-cd mvts_transformer
-//pip3 install -r requirements.
-//pip install -r requirements.txt
-pip install -r failsafe_requirements.txt
-pip install numpy==1.21.6
+conda create --name iTransf python=3.8
+conda activate iTransf
+cd iTransformer
+pip install -r requirements.txt
 
 #Installazione driver cuda
 conda install -c conda-forge cudatoolkit=11.1.1 cudnn=8.1.0
@@ -29,61 +23,73 @@ conda install pytorch==1.7.0 torchvision==0.8.0 torchaudio==0.7.0 cudatoolkit=11
 //pip3 install --upgrade debugpy
 pip install --upgrade debugpy
 
-#Abilitazione GPU 1 (Più forte)
-export CUDA_VISIBLE_DEVICES=0
-
-#Installazione TensorFlow per usare TensorBoard
-pip install nvidia-pyindex ???
-//pip install nvidia-tensorrt
-pip install nvidia-tensorrt==7.2.3.4 ???
-pip install tensorflow-io
-pip install tensorflow[and-cuda]==2.11.0
-
-
 #-----------------------------------------------------------------ESECUZIONE-------------------------------------------------------------------------
 #Creazione screen
-screen -S BeijingPM25Quality
+screen -S electricity
 
 #Attivazione ENV e impostazione Cuda Device
-conda activate transf
+conda activate iTransf
 export CUDA_VISIBLE_DEVICES=0
-cd Tesi/MultivariateTimeSeriesTransformer/mvts_transformer/
+cd Tesi/iTransformer
 
 #Esecuzione test
-BeijingPM25Quality
-python src/main.py --output_dir experiments --comment "regression from Scratch" --name BeijingPM25Quality_fromScratch_Regression --records_file Regression_records.xls --data_dir src/datasets/Regression/BeijingPM25Quality/ --data_class tsra --pattern TRAIN --val_pattern TEST --epochs 1000 --lr 0.001 --optimizer RAdam  --pos_encoding learnable --task regression
-python src/main_debug.py --output_dir experiments --comment "regression from Scratch" --name BeijingPM25Quality_fromScratch_Regression --records_file Regression_records.xls --data_dir src/datasets/Regression/BeijingPM25Quality/ --data_class tsra --pattern TRAIN --val_pattern TEST --epochs 1000 --lr 0.001 --optimizer RAdam  --pos_encoding learnable --task regression
+electricity
+python -u run.py \
+  --is_training 1 \
+  --root_path ./dataset/traffic/ \
+  --data_path traffic.csv \
+  --model_id traffic_96_96 \
+  --model $model_name \
+  --data custom \
+  --features M \
+  --seq_len 96 \
+  --pred_len 96 \
+  --e_layers 4 \
+  --enc_in 862 \
+  --dec_in 862 \
+  --c_out 862 \
+  --des 'Exp' \
+  --d_model 512\
+  --d_ff 512 \
+  --batch_size 16 \
+  --learning_rate 0.001 \
+  --itr 1
 
 #Chiusura screen senza perdere l’elaborazione (Detach)
 CTRL+A , D
 
 #Riattivazione screen (Attach):
-screen -r BeijingPM25Quality
+screen -r electricity
 
 #-----------------------------------------------------------------DEBUG REMOTO-------------------------------------------------------------------------
 #Creazione tunnel
 ssh -L 5678:localhost:5678 pasqualecutolo@blackhole.uniparthenope.it
 
 #Attivazione ENV e impostazione Cuda Device
-conda activate transf
+conda activate iTransf
 export CUDA_VISIBLE_DEVICES=0
-cd Tesi/MultivariateTimeSeriesTransformer/mvts_transformer/
+cd Tesi/iTransformer/
 
-#Esecuzione test
-BeijingPM25Quality
-python src/main_debug.py --output_dir experiments --comment "regression from Scratch" --name BeijingPM25Quality_fromScratch_Regression --records_file Regression_records.xls --data_dir src/datasets/Regression/BeijingPM25Quality/ --data_class tsra --pattern TRAIN --val_pattern TEST --epochs 1000 --lr 0.001 --optimizer RAdam  --pos_encoding learnable --task regression
- --limit_size 2 --n_proc 24 --num_workers 10
-
-
-#-----------------------------------------------------------------TensorBoard REMOTO-------------------------------------------------------------------------
-ssh -L 5679:localhost:5679 pasqualecutolo@blackhole.uniparthenope.it
-conda activate transf
-export CUDA_VISIBLE_DEVICES=0
-cd /home/pasqualecutolo/Tesi/MultivariateTimeSeriesTransformer/mvts_transformer/experiments
-cd Tesi/MultivariateTimeSeriesTransformer/mvts_transformer/experiments/BeijingPM25Quality_fromScratch_Regression_2024-03-17_08-54-32_lw2
-//export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/pasqualecutolo/.conda/envs/transf/lib
-//export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/pasqualecutolo/.conda/envs/transf/lib/python3.8/site-packages/tensorrt
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/pasqualecutolo/.conda/envs/transf/lib:/home/pasqualecutolo/.conda/envs/transf/lib/python3.8/site-packages/tensorrt
-tensorboard --logdir tb_summaries --port 5679
-
-http://127.0.0.1:5679/
+#Esecuzione debug
+electricity
+  --model $model_name \
+python -u run_debug.py \
+  --is_training 1 \
+  --root_path ./dataset/traffic/ \
+  --data_path traffic.csv \
+  --model_id traffic_96_96 \
+  --model iTransformer \
+  --data custom \
+  --features M \
+  --seq_len 96 \
+  --pred_len 96 \
+  --e_layers 4 \
+  --enc_in 862 \
+  --dec_in 862 \
+  --c_out 862 \
+  --des 'Exp' \
+  --d_model 512\
+  --d_ff 512 \
+  --batch_size 16 \
+  --learning_rate 0.001 \
+  --itr 1
